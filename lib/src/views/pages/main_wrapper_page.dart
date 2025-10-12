@@ -78,17 +78,17 @@ class MainWrapperPage extends StatelessWidget {
         onTap: () => navigationShell.goBranch(index),
         borderRadius: BorderRadius.circular(
           20,
-        ), // Memberi efek ripple yang lebih baik
+        ), 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 24), // Ukuran ikon sedikit dikurangi
-            const SizedBox(height: 2), // Jarak antara ikon dan teks dikurangi
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 2), 
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 11, // Ukuran font sedikit dikurangi
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               overflow: TextOverflow.ellipsis,
