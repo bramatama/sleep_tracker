@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Halaman untuk mengedit informasi profil pengguna
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});
 

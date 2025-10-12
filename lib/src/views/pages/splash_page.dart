@@ -12,7 +12,6 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // Simulasi waktu loading, lalu pindah ke halaman utama
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         context.go('/home'); // Arahkan ke home setelah 2 detik

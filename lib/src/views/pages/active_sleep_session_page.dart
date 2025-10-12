@@ -20,9 +20,7 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
   }
 
   void _endSession() {
-    // Di sini logika untuk menyimpan data ke database
-    // dan menampilkan dialog ringkasan & rating
-    context.pop(); // Kembali ke halaman sebelumnya
+    context.pop();
   }
 
   @override
@@ -35,7 +33,6 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
     );
   }
 
-  // Tampilan SEBELUM sesi dimulai
   Widget _buildSetupView() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -80,7 +77,6 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
     );
   }
 
-  // Tampilan SAAT sesi aktif
   Widget _buildActiveView() {
     return Center(
       child: Padding(

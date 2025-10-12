@@ -11,7 +11,6 @@ class AnalysisPage extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Statistik Utama
           Text(
             "Statistik Utama (Bulan Ini)",
             style: Theme.of(context).textTheme.titleLarge,
@@ -30,7 +29,6 @@ class AnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Analisis Korelasi Faktor
           Text(
             "Pengaruh Aktivitas",
             style: Theme.of(context).textTheme.titleLarge,
@@ -51,7 +49,6 @@ class AnalysisPage extends StatelessWidget {
   }
 }
 
-// Widget Bantuan
 class StatCard extends StatelessWidget {
   final String title;
   final String value;

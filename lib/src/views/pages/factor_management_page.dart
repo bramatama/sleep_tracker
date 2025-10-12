@@ -15,7 +15,6 @@ class FactorManagementPage extends StatelessWidget {
             icon: const Icon(Icons.edit),
             tooltip: "Edit Faktor",
             onPressed: () {
-              // Navigasi ke halaman edit
               context.push('/factors/edit');
             },
           ),
@@ -28,7 +27,7 @@ class FactorManagementPage extends StatelessWidget {
           return ListTile(
             leading: Text(factor.icon, style: const TextStyle(fontSize: 24)),
             title: Text(factor.name),
-            subtitle: const Text("Faktor bawaan"), // Ganti logika jika perlu
+            subtitle: const Text("Faktor bawaan"),
           );
         },
       ),

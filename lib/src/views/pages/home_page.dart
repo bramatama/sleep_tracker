@@ -20,7 +20,6 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kartu Ringkasan Tidur Terakhir
             Text(
               "Tidur Terakhir Anda",
               style: Theme.of(context).textTheme.titleLarge,
@@ -32,7 +31,6 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Tren Mingguan
             Text(
               "Tren Mingguan",
               style: Theme.of(context).textTheme.titleLarge,
@@ -41,7 +39,6 @@ class HomePage extends StatelessWidget {
             WeeklyChart(data: weeklySleepData),
             const SizedBox(height: 24),
 
-            // Faktor Terakhir Dicatat
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -10,10 +10,8 @@ class EditFactorsPage extends StatefulWidget {
 }
 
 class _EditFactorsPageState extends State<EditFactorsPage> {
-  // Dalam aplikasi nyata, ini akan memanipulasi data dari database
   final List<DummyFactor> _factors = List.from(allFactors);
 
-  // Fungsi untuk menampilkan dialog tambah faktor
   void _showAddFactorDialog() async {
     final newFactor = await showDialog<DummyFactor>(
       context: context,
@@ -22,7 +20,6 @@ class _EditFactorsPageState extends State<EditFactorsPage> {
       },
     );
 
-    // Jika pengguna menyimpan faktor baru (dialog tidak mengembalikan null)
     if (newFactor != null) {
       setState(() {
         _factors.add(newFactor);
@@ -64,7 +61,7 @@ class _EditFactorsPageState extends State<EditFactorsPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddFactorDialog, // Memanggil fungsi dialog
+        onPressed: _showAddFactorDialog,
         tooltip: 'Tambah Faktor',
         child: const Icon(Icons.add),
       ),

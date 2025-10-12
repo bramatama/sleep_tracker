@@ -14,13 +14,11 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
   final _iconController = TextEditingController();
 
   void _submit() {
-    // Validasi form sebelum submit
     if (_formKey.currentState!.validate()) {
       final newFactor = DummyFactor(
         name: _nameController.text,
         icon: _iconController.text,
       );
-      // Kirim data faktor baru kembali ke halaman sebelumnya
       Navigator.of(context).pop(newFactor);
     }
   }
@@ -32,7 +30,7 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
       content: Form(
         key: _formKey,
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Agar dialog tidak terlalu besar
+          mainAxisSize: MainAxisSize.min, 
           children: [
             TextFormField(
               controller: _nameController,
@@ -60,7 +58,6 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
                 if (value == null || value.trim().isEmpty) {
                   return 'Ikon tidak boleh kosong';
                 }
-                // Validasi sederhana untuk memastikan itu emoji tunggal
                 if (value.characters.length != 1) {
                   return 'Harap masukkan satu emoji saja';
                 }
