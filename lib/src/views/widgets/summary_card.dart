@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../models/dummy_data.dart';
+import '../../models/database/database.dart'; // Ganti ke model Drift
 
 class SummaryCard extends StatelessWidget {
-  final DummySleepSession session;
+  final SleepSession session;
   final VoidCallback onTap;
 
   const SummaryCard({super.key, required this.session, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final duration = session.duration;
+    final duration = Duration(minutes: session.durationInMinutes ?? 0);
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
 
@@ -34,7 +34,7 @@ class SummaryCard extends StatelessWidget {
                   const Icon(Icons.star, color: Colors.amber, size: 20),
                   const SizedBox(width: 4),
                   Text(
-                    "${session.quality}/5 Kualitas",
+                    "${session.qualityRating ?? 'N/A'}/5 Kualitas",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],
@@ -45,7 +45,7 @@ class SummaryCard extends StatelessWidget {
                   const Icon(Icons.schedule, color: Colors.grey, size: 20),
                   const SizedBox(width: 4),
                   Text(
-                    "${TimeOfDay.fromDateTime(session.startTime).format(context)} - ${TimeOfDay.fromDateTime(session.endTime).format(context)}",
+                    "${TimeOfDay.fromDateTime(session.startedAt).format(context)} - ${session.endedAt != null ? TimeOfDay.fromDateTime(session.endedAt!).format(context) : '...'}",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ],

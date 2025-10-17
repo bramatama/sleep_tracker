@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../models/dummy_data.dart';
 
 class AddFactorDialog extends StatefulWidget {
   const AddFactorDialog({super.key});
@@ -15,11 +14,11 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      final newFactor = DummyFactor(
-        name: _nameController.text,
-        icon: _iconController.text,
-      );
-      Navigator.of(context).pop(newFactor);
+      final newFactorData = {
+        'name': _nameController.text,
+        'icon': _iconController.text,
+      };
+      Navigator.of(context).pop(newFactorData);
     }
   }
 
@@ -30,16 +29,16 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
       content: Form(
         key: _formKey,
         child: Column(
-          mainAxisSize: MainAxisSize.min, 
+          mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Nama Faktor',
                 hintText: 'e.g., Baca Buku',
-                border: OutlineInputBorder(),
               ),
               validator: (value) {
+                // <-- FIX: Menambahkan kurung kurawal
                 if (value == null || value.trim().isEmpty) {
                   return 'Nama tidak boleh kosong';
                 }
@@ -52,9 +51,9 @@ class _AddFactorDialogState extends State<AddFactorDialog> {
               decoration: const InputDecoration(
                 labelText: 'Ikon (Cukup 1 Emoji)',
                 hintText: 'e.g., 📖',
-                border: OutlineInputBorder(),
               ),
               validator: (value) {
+                // <-- FIX: Menambahkan kurung kurawal
                 if (value == null || value.trim().isEmpty) {
                   return 'Ikon tidak boleh kosong';
                 }

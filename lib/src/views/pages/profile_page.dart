@@ -7,9 +7,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil & Pengaturan'),
-      ),
+      appBar: AppBar(title: const Text('Profil & Pengaturan')),
       body: ListView(
         children: [
           const UserAccountsDrawerHeader(

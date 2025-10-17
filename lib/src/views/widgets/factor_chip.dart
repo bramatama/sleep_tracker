@@ -1,9 +1,8 @@
-// widgets/factor_chip.dart
 import 'package:flutter/material.dart';
-import '../../models/dummy_data.dart';
+import '../../models/database/database.dart'; // Ganti ke model Drift
 
 class FactorChip extends StatelessWidget {
-  final DummyFactor factor;
+  final Factor factor;
   const FactorChip({super.key, required this.factor});
 
   @override

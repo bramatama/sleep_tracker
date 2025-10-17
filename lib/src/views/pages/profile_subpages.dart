@@ -30,7 +30,7 @@ class EditProfilePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: 'Programmer',
+            initialValue: 'Programmer', // <-- FIX: Mengganti value
             decoration: const InputDecoration(
               labelText: 'Aktivitas Utama',
               border: OutlineInputBorder(),
@@ -72,7 +72,6 @@ class EditProfilePage extends StatelessWidget {
   }
 }
 
-// Halaman untuk pengaturan aplikasi
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 

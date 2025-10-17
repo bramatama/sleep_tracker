@@ -11,7 +11,7 @@ class MainWrapperPage extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: BottomAppBar(
-        height: 70,
+        height: 70, // Memberi ruang lebih untuk teks
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -23,7 +23,7 @@ class MainWrapperPage extends StatelessWidget {
               label: 'Analisis',
               index: 1,
             ),
-            _buildStartSessionButton(context), 
+            _buildStartSessionButton(context), // Tombol tengah
             _buildNavItem(
               context,
               icon: Icons.list_alt,
@@ -42,6 +42,7 @@ class MainWrapperPage extends StatelessWidget {
     );
   }
 
+  // Tombol aksi utama di tengah yang telah diperbaiki
   Widget _buildStartSessionButton(BuildContext context) {
     return InkWell(
       onTap: () => context.push('/active-session'),
@@ -53,17 +54,19 @@ class MainWrapperPage extends StatelessWidget {
           color: Theme.of(context).primaryColor,
           shape: BoxShape.circle,
         ),
+        // Menambahkan Center untuk memastikan ikon benar-benar di tengah
         child: const Center(
           child: Icon(
             Icons.nights_stay_outlined,
             color: Colors.white,
-            size: 32, 
+            size: 32, // Ukuran ikon disesuaikan agar pas
           ),
         ),
       ),
     );
   }
 
+  // Item navigasi dengan ikon dan teks
   Widget _buildNavItem(
     BuildContext context, {
     required IconData icon,
@@ -78,17 +81,17 @@ class MainWrapperPage extends StatelessWidget {
         onTap: () => navigationShell.goBranch(index),
         borderRadius: BorderRadius.circular(
           20,
-        ), 
+        ), // Memberi efek ripple yang lebih baik
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 2), 
+            Icon(icon, color: color, size: 24), // Ukuran ikon sedikit dikurangi
+            const SizedBox(height: 2), // Jarak antara ikon dan teks dikurangi
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 11,
+                fontSize: 11, // Ukuran font sedikit dikurangi
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
               overflow: TextOverflow.ellipsis,

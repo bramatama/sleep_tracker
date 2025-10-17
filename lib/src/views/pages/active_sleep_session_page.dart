@@ -1,39 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/dummy_data.dart';
+import '../../controllers/sleep_session/sleep_session_cubit.dart';
+// import '../../models/database/database.dart';
+import '../../models/repositories/factor_repository.dart';
+import '../../models/repositories/sleep_repository.dart';
+import '../../utils/service_locator.dart';
 
-class ActiveSleepSessionPage extends StatefulWidget {
+class ActiveSleepSessionPage extends StatelessWidget {
   const ActiveSleepSessionPage({super.key});
 
   @override
-  State<ActiveSleepSessionPage> createState() => _ActiveSleepSessionPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) =>
+          SleepSessionCubit(sl<SleepRepository>(), sl<FactorRepository>())
+            ..loadFactors(),
+      child: const ActiveSleepSessionView(),
+    );
+  }
 }
 
-class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
-  bool _isSessionActive = false;
-  final Set<DummyFactor> _selectedFactors = {};
-
-  void _startSession() {
-    setState(() {
-      _isSessionActive = true;
-    });
-  }
-
-  void _endSession() {
-    context.pop();
-  }
+class ActiveSleepSessionView extends StatelessWidget {
+  const ActiveSleepSessionView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isSessionActive ? 'Sesi Tidur...' : 'Mulai Sesi Tidur'),
-      ),
-      body: _isSessionActive ? _buildActiveView() : _buildSetupView(),
+    return BlocConsumer<SleepSessionCubit, SleepSessionState>(
+      listener: (context, state) {
+        if (state.status == SleepStatus.finished) {
+          // Tampilkan dialog rating lalu pop
+          showDialog(
+            context: context,
+            builder: (_) => RatingDialog(
+              onSubmit: (rating) {
+                context.read<SleepSessionCubit>().endSession(rating);
+                context.pop(); // Tutup dialog
+                context.pop(); // Kembali ke halaman utama
+              },
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              state.status == SleepStatus.active
+                  ? 'Sesi Tidur...'
+                  : 'Mulai Sesi Tidur',
+            ),
+          ),
+          body: state.status == SleepStatus.active
+              ? _buildActiveView(context)
+              : _buildSetupView(context, state),
+        );
+      },
     );
   }
 
-  Widget _buildSetupView() {
+  Widget _buildSetupView(BuildContext context, SleepSessionState state) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -44,32 +70,28 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: allFactors.map((factor) {
-              final isSelected = _selectedFactors.contains(factor);
-              return FilterChip(
-                label: Text('${factor.icon} ${factor.name}'),
-                selected: isSelected,
-                onSelected: (bool selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedFactors.add(factor);
-                    } else {
-                      _selectedFactors.remove(factor);
-                    }
-                  });
-                },
-              );
-            }).toList(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: state.allFactors.map((factor) {
+                  final isSelected = state.selectedFactors.contains(factor);
+                  return FilterChip(
+                    label: Text('${factor.icon} ${factor.name}'),
+                    selected: isSelected,
+                    onSelected: (_) =>
+                        context.read<SleepSessionCubit>().toggleFactor(factor),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-          const Spacer(),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            onPressed: _startSession,
+            onPressed: () => context.read<SleepSessionCubit>().startSession(),
             child: const Text('Mulai Tidur'),
           ),
         ],
@@ -77,7 +99,8 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
     );
   }
 
-  Widget _buildActiveView() {
+  Widget _buildActiveView(BuildContext context) {
+    // Tombol end session sekarang akan memicu listener untuk menampilkan dialog
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -90,13 +113,6 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
               style: Theme.of(context).textTheme.headlineMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            Text(
-              // Perkiraan waktu bangun (misal: 8 jam dari sekarang)
-              "Perkiraan bangun sekitar pukul ${TimeOfDay.fromDateTime(DateTime.now().add(const Duration(hours: 8))).format(context)}",
-              style: Theme.of(context).textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
             const SizedBox(height: 40),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -104,7 +120,9 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
               ),
-              onPressed: _endSession,
+              onPressed: () => context.read<SleepSessionCubit>().endSession(
+                0,
+              ), // Rating akan diisi dari dialog
               child: const Text(
                 'Saya Sudah Bangun',
                 style: TextStyle(fontSize: 18),
@@ -113,6 +131,42 @@ class _ActiveSleepSessionPageState extends State<ActiveSleepSessionPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Dialog untuk rating
+class RatingDialog extends StatefulWidget {
+  final Function(int) onSubmit;
+  const RatingDialog({super.key, required this.onSubmit});
+  @override
+  State<RatingDialog> createState() => _RatingDialogState();
+}
+
+class _RatingDialogState extends State<RatingDialog> {
+  int _rating = 3;
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Bagaimana kualitas tidurmu?"),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(5, (index) {
+          return IconButton(
+            icon: Icon(
+              index < _rating ? Icons.star : Icons.star_border,
+              color: Colors.amber,
+            ),
+            onPressed: () => setState(() => _rating = index + 1),
+          );
+        }),
+      ),
+      actions: [
+        ElevatedButton(
+          onPressed: () => widget.onSubmit(_rating),
+          child: const Text("Simpan"),
+        ),
+      ],
     );
   }
 }

@@ -1,36 +1,51 @@
 import 'package:flutter/material.dart';
-import '../../models/dummy_data.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../controllers/factors/factors_bloc.dart';
+import '../../models/database/database.dart';
 import '../widgets/add_factor_dialog.dart';
+import '../widgets/edit_factor_dialog.dart';
 
-class EditFactorsPage extends StatefulWidget {
+class EditFactorsPage extends StatelessWidget {
   const EditFactorsPage({super.key});
 
   @override
-  State<EditFactorsPage> createState() => _EditFactorsPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: BlocProvider.of<FactorsBloc>(context),
+      child: const EditFactorsView(),
+    );
+  }
 }
 
-class _EditFactorsPageState extends State<EditFactorsPage> {
-  final List<DummyFactor> _factors = List.from(allFactors);
+class EditFactorsView extends StatelessWidget {
+  const EditFactorsView({super.key});
 
-  void _showAddFactorDialog() async {
-    final newFactor = await showDialog<DummyFactor>(
+  // -- FIX: Mengisi body fungsi yang kosong --
+  void _showAddFactorDialog(BuildContext context) async {
+    final newFactorData = await showDialog<Map<String, String>>(
       context: context,
       builder: (BuildContext context) {
         return const AddFactorDialog();
       },
     );
 
-    if (newFactor != null) {
-      setState(() {
-        _factors.add(newFactor);
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Faktor '${newFactor.name}' berhasil ditambahkan."),
-          ),
-        );
-      }
+    if (newFactorData != null && newFactorData.isNotEmpty) {
+      if (!context.mounted) return; // FIX: Menambahkan mounted check
+      context.read<FactorsBloc>().add(
+        AddFactor(newFactorData['name']!, newFactorData['icon']!),
+      );
+    }
+  }
+
+  void _showEditFactorDialog(BuildContext context, Factor factorToEdit) async {
+    final updatedFactor = await showDialog<FactorsCompanion>(
+      context: context,
+      builder: (_) => EditFactorDialog(initialFactor: factorToEdit),
+    );
+
+    if (updatedFactor != null) {
+      if (!context.mounted) return; // FIX: Menambahkan mounted check
+      context.read<FactorsBloc>().add(EditFactor(updatedFactor));
     }
   }
 
@@ -38,30 +53,54 @@ class _EditFactorsPageState extends State<EditFactorsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Faktor')),
-      body: ListView.builder(
-        itemCount: _factors.length,
-        itemBuilder: (context, index) {
-          final factor = _factors[index];
-          return ListTile(
-            leading: Text(factor.icon, style: const TextStyle(fontSize: 24)),
-            title: Text(factor.name),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () {
-                final removedFactorName = _factors[index].name;
-                setState(() {
-                  _factors.removeAt(index);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("'$removedFactorName' dihapus.")),
+      body: BlocBuilder<FactorsBloc, FactorsState>(
+        builder: (context, state) {
+          if (state is FactorsLoading || state is FactorsInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state is FactorsLoaded) {
+            return ListView.builder(
+              itemCount: state.factors.length,
+              itemBuilder: (context, index) {
+                final factor = state.factors[index];
+                return ListTile(
+                  leading: Text(
+                    factor.icon,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(factor.name),
+                  trailing: factor.isDefault
+                      ? null
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined),
+                              onPressed: () =>
+                                  _showEditFactorDialog(context, factor),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () {
+                                context.read<FactorsBloc>().add(
+                                  DeleteFactor(factor.id),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                 );
               },
-            ),
-          );
+            );
+          }
+          return const Center(child: Text("Terjadi kesalahan."));
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showAddFactorDialog,
+        onPressed: () => _showAddFactorDialog(context),
         tooltip: 'Tambah Faktor',
         child: const Icon(Icons.add),
       ),
