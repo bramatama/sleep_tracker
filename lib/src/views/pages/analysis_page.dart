@@ -40,22 +40,39 @@ class AnalysisView extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 8),
-                const Row(
-                  children: [
-                    Expanded(
-                      child: StatCard(
-                        title: "Rata-rata Durasi",
-                        value: "7j 21m",
-                      ),
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: StatCard(
-                        title: "Rata-rata Kualitas",
-                        value: "4.1 ★",
-                      ),
-                    ),
-                  ],
+                FutureBuilder<Map<String, dynamic>>(
+                  future: sl<SleepRepository>().getMonthlyStats(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final data =
+                        snapshot.data ?? {'avgDuration': 0, 'avgQuality': 0.0};
+                    final avgMinutes = data['avgDuration'] as int;
+                    final avgQuality = data['avgQuality'] as double;
+
+                    final hours = avgMinutes ~/ 60;
+                    final minutes = avgMinutes % 60;
+
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: StatCard(
+                            title: "Rata-rata Durasi",
+                            value: "${hours}j ${minutes}m",
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: StatCard(
+                            title: "Rata-rata Kualitas",
+                            value: "${avgQuality.toStringAsFixed(1)} ★",
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 // Analisis Korelasi Faktor

@@ -9,6 +9,7 @@ class Users extends Table {
   TextColumn get password => text()();
   TextColumn get primaryActivity =>
       text().named('primary_activity').nullable()();
+  TextColumn get profilePicture => text().nullable()();
   
   @override
   Set<Column> get primaryKey => {id};

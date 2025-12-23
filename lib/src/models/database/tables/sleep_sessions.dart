@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'users.dart';
 
-// Tabel utama untuk mencatat setiap sesi tidur.
 @DataClassName('SleepSession')
 class SleepSessions extends Table {
   IntColumn get id => integer().autoIncrement()();

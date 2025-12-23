@@ -62,6 +62,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _profilePictureMeta = const VerificationMeta(
+    'profilePicture',
+  );
+  @override
+  late final GeneratedColumn<String> profilePicture = GeneratedColumn<String>(
+    'profile_picture',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -69,6 +80,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     email,
     password,
     primaryActivity,
+    profilePicture,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -118,6 +130,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         ),
       );
     }
+    if (data.containsKey('profile_picture')) {
+      context.handle(
+        _profilePictureMeta,
+        profilePicture.isAcceptableOrUnknown(
+          data['profile_picture']!,
+          _profilePictureMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -147,6 +168,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         DriftSqlType.string,
         data['${effectivePrefix}primary_activity'],
       ),
+      profilePicture: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_picture'],
+      ),
     );
   }
 
@@ -162,12 +187,14 @@ class User extends DataClass implements Insertable<User> {
   final String email;
   final String password;
   final String? primaryActivity;
+  final String? profilePicture;
   const User({
     required this.id,
     required this.name,
     required this.email,
     required this.password,
     this.primaryActivity,
+    this.profilePicture,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -178,6 +205,9 @@ class User extends DataClass implements Insertable<User> {
     map['password'] = Variable<String>(password);
     if (!nullToAbsent || primaryActivity != null) {
       map['primary_activity'] = Variable<String>(primaryActivity);
+    }
+    if (!nullToAbsent || profilePicture != null) {
+      map['profile_picture'] = Variable<String>(profilePicture);
     }
     return map;
   }
@@ -191,6 +221,9 @@ class User extends DataClass implements Insertable<User> {
       primaryActivity: primaryActivity == null && nullToAbsent
           ? const Value.absent()
           : Value(primaryActivity),
+      profilePicture: profilePicture == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profilePicture),
     );
   }
 
@@ -205,6 +238,7 @@ class User extends DataClass implements Insertable<User> {
       email: serializer.fromJson<String>(json['email']),
       password: serializer.fromJson<String>(json['password']),
       primaryActivity: serializer.fromJson<String?>(json['primaryActivity']),
+      profilePicture: serializer.fromJson<String?>(json['profilePicture']),
     );
   }
   @override
@@ -216,6 +250,7 @@ class User extends DataClass implements Insertable<User> {
       'email': serializer.toJson<String>(email),
       'password': serializer.toJson<String>(password),
       'primaryActivity': serializer.toJson<String?>(primaryActivity),
+      'profilePicture': serializer.toJson<String?>(profilePicture),
     };
   }
 
@@ -225,6 +260,7 @@ class User extends DataClass implements Insertable<User> {
     String? email,
     String? password,
     Value<String?> primaryActivity = const Value.absent(),
+    Value<String?> profilePicture = const Value.absent(),
   }) => User(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -233,6 +269,9 @@ class User extends DataClass implements Insertable<User> {
     primaryActivity: primaryActivity.present
         ? primaryActivity.value
         : this.primaryActivity,
+    profilePicture: profilePicture.present
+        ? profilePicture.value
+        : this.profilePicture,
   );
   User copyWithCompanion(UsersCompanion data) {
     return User(
@@ -243,6 +282,9 @@ class User extends DataClass implements Insertable<User> {
       primaryActivity: data.primaryActivity.present
           ? data.primaryActivity.value
           : this.primaryActivity,
+      profilePicture: data.profilePicture.present
+          ? data.profilePicture.value
+          : this.profilePicture,
     );
   }
 
@@ -253,13 +295,15 @@ class User extends DataClass implements Insertable<User> {
           ..write('name: $name, ')
           ..write('email: $email, ')
           ..write('password: $password, ')
-          ..write('primaryActivity: $primaryActivity')
+          ..write('primaryActivity: $primaryActivity, ')
+          ..write('profilePicture: $profilePicture')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, email, password, primaryActivity);
+  int get hashCode =>
+      Object.hash(id, name, email, password, primaryActivity, profilePicture);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -268,7 +312,8 @@ class User extends DataClass implements Insertable<User> {
           other.name == this.name &&
           other.email == this.email &&
           other.password == this.password &&
-          other.primaryActivity == this.primaryActivity);
+          other.primaryActivity == this.primaryActivity &&
+          other.profilePicture == this.profilePicture);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -277,12 +322,14 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> email;
   final Value<String> password;
   final Value<String?> primaryActivity;
+  final Value<String?> profilePicture;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.email = const Value.absent(),
     this.password = const Value.absent(),
     this.primaryActivity = const Value.absent(),
+    this.profilePicture = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -290,6 +337,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     required String email,
     required String password,
     this.primaryActivity = const Value.absent(),
+    this.profilePicture = const Value.absent(),
   }) : name = Value(name),
        email = Value(email),
        password = Value(password);
@@ -299,6 +347,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? email,
     Expression<String>? password,
     Expression<String>? primaryActivity,
+    Expression<String>? profilePicture,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -306,6 +355,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       if (email != null) 'email': email,
       if (password != null) 'password': password,
       if (primaryActivity != null) 'primary_activity': primaryActivity,
+      if (profilePicture != null) 'profile_picture': profilePicture,
     });
   }
 
@@ -315,6 +365,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Value<String>? email,
     Value<String>? password,
     Value<String?>? primaryActivity,
+    Value<String?>? profilePicture,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -322,6 +373,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       email: email ?? this.email,
       password: password ?? this.password,
       primaryActivity: primaryActivity ?? this.primaryActivity,
+      profilePicture: profilePicture ?? this.profilePicture,
     );
   }
 
@@ -343,6 +395,9 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (primaryActivity.present) {
       map['primary_activity'] = Variable<String>(primaryActivity.value);
     }
+    if (profilePicture.present) {
+      map['profile_picture'] = Variable<String>(profilePicture.value);
+    }
     return map;
   }
 
@@ -353,7 +408,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('name: $name, ')
           ..write('email: $email, ')
           ..write('password: $password, ')
-          ..write('primaryActivity: $primaryActivity')
+          ..write('primaryActivity: $primaryActivity, ')
+          ..write('profilePicture: $profilePicture')
           ..write(')'))
         .toString();
   }
@@ -1387,6 +1443,7 @@ typedef $$UsersTableCreateCompanionBuilder =
       required String email,
       required String password,
       Value<String?> primaryActivity,
+      Value<String?> profilePicture,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
@@ -1395,6 +1452,7 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String> email,
       Value<String> password,
       Value<String?> primaryActivity,
+      Value<String?> profilePicture,
     });
 
 final class $$UsersTableReferences
@@ -1469,6 +1527,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get primaryActivity => $composableBuilder(
     column: $table.primaryActivity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profilePicture => $composableBuilder(
+    column: $table.profilePicture,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1556,6 +1619,11 @@ class $$UsersTableOrderingComposer
     column: $table.primaryActivity,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get profilePicture => $composableBuilder(
+    column: $table.profilePicture,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -1581,6 +1649,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get primaryActivity => $composableBuilder(
     column: $table.primaryActivity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profilePicture => $composableBuilder(
+    column: $table.profilePicture,
     builder: (column) => column,
   );
 
@@ -1668,12 +1741,14 @@ class $$UsersTableTableManager
                 Value<String> email = const Value.absent(),
                 Value<String> password = const Value.absent(),
                 Value<String?> primaryActivity = const Value.absent(),
+                Value<String?> profilePicture = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 name: name,
                 email: email,
                 password: password,
                 primaryActivity: primaryActivity,
+                profilePicture: profilePicture,
               ),
           createCompanionCallback:
               ({
@@ -1682,12 +1757,14 @@ class $$UsersTableTableManager
                 required String email,
                 required String password,
                 Value<String?> primaryActivity = const Value.absent(),
+                Value<String?> profilePicture = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 name: name,
                 email: email,
                 password: password,
                 primaryActivity: primaryActivity,
+                profilePicture: profilePicture,
               ),
           withReferenceMapper: (p0) => p0
               .map(

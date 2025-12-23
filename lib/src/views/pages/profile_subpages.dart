@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../controllers/profile/profile_cubit.dart';
+import '../../models/repositories/sleep_repository.dart';
+import '../../utils/service_locator.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -13,6 +17,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   String? _selectedActivity;
+  String? _profilePicturePath;
 
   final List<String> _activities = [
     'Mahasiswa',
@@ -34,6 +39,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _nameController.text = profileState.profile.name;
       _emailController.text = profileState.profile.email;
       _selectedActivity = profileState.profile.primaryActivity;
+      _profilePicturePath = profileState.profile.profilePicture;
     }
   }
 
@@ -56,12 +62,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
       name: _nameController.text,
       email: _emailController.text,
       primaryActivity: _selectedActivity,
+      profilePicture: _profilePicturePath,
     );
 
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Profil berhasil diperbarui!")),
     );
+  }
+
+  // Fungsi dummy untuk simulasi pick image.
+  // Di aplikasi nyata, gunakan package 'image_picker'.
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profilePicturePath = pickedFile.path;
+      });
+    }
   }
 
   @override
@@ -71,6 +90,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          Center(
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: _profilePicturePath != null
+                    ? FileImage(File(_profilePicturePath!))
+                    : null,
+                child: _profilePicturePath == null
+                    ? const Icon(Icons.camera_alt, size: 40)
+                    : null,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           TextFormField(
             controller: _nameController,
             decoration: const InputDecoration(
@@ -124,95 +158,98 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 }
 
-class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
-
-  @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  bool _isDarkMode = false;
-  bool _sleepReminder = true;
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 22, minute: 0);
+class SleepHistoryPage extends StatelessWidget {
+  const SleepHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengaturan Aplikasi')),
-      body: ListView(
-        children: [
-          _buildSectionHeader(context, "Tampilan"),
-          SwitchListTile(
-            title: const Text('Mode Gelap'),
-            value: _isDarkMode,
-            onChanged: (value) {
-              setState(() {
-                _isDarkMode = value;
-              });
-            },
-            secondary: const Icon(Icons.dark_mode_outlined),
-          ),
-          _buildSectionHeader(context, "Notifikasi"),
-          SwitchListTile(
-            title: const Text('Pengingat Waktu Tidur'),
-            subtitle: Text(
-              _sleepReminder
-                  ? 'Setiap hari pukul ${_reminderTime.format(context)}'
-                  : 'Nonaktif',
-            ),
-            value: _sleepReminder,
-            onChanged: (value) {
-              setState(() {
-                _sleepReminder = value;
-              });
-            },
-            secondary: const Icon(Icons.notifications_active_outlined),
-          ),
-          if (_sleepReminder)
-            ListTile(
-              title: const Text('Ubah Waktu Pengingat'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                final newTime = await showTimePicker(
-                  context: context,
-                  initialTime: _reminderTime,
-                );
-                if (newTime != null) {
-                  setState(() {
-                    _reminderTime = newTime;
-                  });
-                }
-              },
-            ),
-          _buildSectionHeader(context, "Data"),
-          ListTile(
-            leading: const Icon(Icons.download_for_offline_outlined),
-            title: const Text('Ekspor Data'),
-            subtitle: const Text('Simpan riwayat tidur Anda sebagai file CSV.'),
-            onTap: () async {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    "Fitur ekspor data siap. Data dapat diunduh dari device Anda.",
+      appBar: AppBar(title: const Text('Riwayat Tidur')),
+      body: StreamBuilder<List<SleepSessionWithFactors>>(
+        stream: sl<SleepRepository>().watchAllSleepSessions(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final data = snapshot.data ?? [];
+          if (data.isEmpty) {
+            return const Center(
+              child: Text(
+                'Belum ada data tidur.\nMulai tidur sekarang untuk merekam data!',
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+          return ListView.builder(
+            itemCount: data.length,
+            padding: const EdgeInsets.all(16),
+            itemBuilder: (context, index) {
+              final item = data[index];
+              final session = item.session;
+              final duration = session.durationInMinutes ?? 0;
+              final hours = duration ~/ 60;
+              final minutes = duration % 60;
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "${session.startedAt.day}/${session.startedAt.month}/${session.startedAt.year}",
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColorLight,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "${hours}j ${minutes}m",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.star, size: 16, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text("Kualitas: ${session.qualityRating ?? '-'}/5"),
+                          const Spacer(),
+                          ...item.factors.map(
+                            (f) => Padding(
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Text(
+                                f.icon,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               );
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: Theme.of(
-          context,
-        ).textTheme.labelLarge?.copyWith(color: Theme.of(context).primaryColor),
+          );
+        },
       ),
     );
   }

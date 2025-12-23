@@ -1,7 +1,6 @@
 import 'package:drift/drift.dart';
 import 'users.dart';
 
-// Tabel untuk menyimpan daftar semua faktor gaya hidup.
 @DataClassName('Factor')
 class Factors extends Table {
   IntColumn get id => integer().autoIncrement()();

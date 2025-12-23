@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -35,13 +36,77 @@ class ProfileView extends StatelessWidget {
 
             return ListView(
               children: [
-                UserAccountsDrawerHeader(
-                  accountName: Text(profile.name),
-                  accountEmail: Text(profile.email),
-                  currentAccountPicture: const CircleAvatar(
-                    child: Icon(Icons.person, size: 50),
+                // Custom Header
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.white,
+                          backgroundImage: profile.profilePicture != null
+                              ? FileImage(File(profile.profilePicture!))
+                              : null,
+                          child: profile.profilePicture == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Colors.grey[400],
+                                )
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        profile.name,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        profile.email,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                      if (profile.primaryActivity != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            profile.primaryActivity!,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
+                const SizedBox(height: 24),
                 ListTile(
                   leading: const Icon(Icons.edit_outlined),
                   title: const Text('Edit Profil'),
@@ -51,25 +116,9 @@ class ProfileView extends StatelessWidget {
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.settings_outlined),
-                  title: const Text('Pengaturan Aplikasi'),
-                  onTap: () => context.push('/profile/settings'),
-                ),
-                const Divider(),
-                ListTile(
-                  leading: Icon(Icons.logout, color: Colors.red.shade400),
-                  title: Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red.shade400),
-                  ),
-                  onTap: () {
-                    // Logika logout
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Fitur logout akan tersedia segera'),
-                      ),
-                    );
-                  },
+                  leading: const Icon(Icons.history),
+                  title: const Text('Riwayat Tidur'),
+                  onTap: () => context.push('/profile/history'),
                 ),
               ],
             );

@@ -84,6 +84,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     required String name,
     required String email,
     String? primaryActivity,
+    String? profilePicture,
   }) async {
     if (state is ProfileLoaded) {
       final currentProfile = (state as ProfileLoaded).profile;
@@ -95,12 +96,14 @@ class ProfileCubit extends Cubit<ProfileState> {
           name: name,
           email: email,
           primaryActivity: primaryActivity,
+          profilePicture: profilePicture,
         );
 
         final updatedProfile = currentProfile.copyWith(
           name: name,
           email: email,
           primaryActivity: primaryActivity,
+          profilePicture: profilePicture,
         );
 
         emit(ProfileUpdated(updatedProfile));

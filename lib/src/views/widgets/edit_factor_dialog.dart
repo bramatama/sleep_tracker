@@ -40,38 +40,40 @@ class _EditFactorDialogState extends State<EditFactorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Edit Faktor'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nama Faktor'),
-              validator: (v) {
-                // <-- FIX: Menambahkan kurung kurawal
-                if (v == null || v.trim().isEmpty) {
-                  return 'Nama tidak boleh kosong';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _iconController,
-              decoration: const InputDecoration(labelText: 'Ikon (1 Emoji)'),
-              validator: (v) {
-                // <-- FIX: Menambahkan kurung kurawal
-                if (v == null || v.trim().isEmpty) {
-                  return 'Ikon tidak boleh kosong';
-                }
-                if (v.characters.length != 1) {
-                  return 'Harap masukkan satu emoji saja';
-                }
-                return null;
-              },
-            ),
-          ],
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Nama Faktor'),
+                validator: (v) {
+                  // <-- FIX: Menambahkan kurung kurawal
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Nama tidak boleh kosong';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _iconController,
+                decoration: const InputDecoration(labelText: 'Ikon (1 Emoji)'),
+                validator: (v) {
+                  // <-- FIX: Menambahkan kurung kurawal
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Ikon tidak boleh kosong';
+                  }
+                  if (v.characters.length != 1) {
+                    return 'Harap masukkan satu emoji saja';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       actions: [

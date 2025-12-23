@@ -7,10 +7,8 @@ import '../models/repositories/user_repository.dart';
 final sl = GetIt.instance;
 
 void setupLocator() {
-  // Database
   sl.registerLazySingleton(() => AppDatabase());
 
-  // Repositories
   sl.registerLazySingleton(() => FactorRepository());
   sl.registerLazySingleton(() => SleepRepository());
   sl.registerLazySingleton(() => UserRepository());

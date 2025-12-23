@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/database/database.dart'; // <-- FIX: Import ini yang dibutuhkan
@@ -63,7 +64,7 @@ class FactorsError extends FactorsState {
 // BLoC
 class FactorsBloc extends Bloc<FactorsEvent, FactorsState> {
   final FactorRepository _factorRepository = sl<FactorRepository>();
-  Stream<List<Factor>>? _factorsStream;
+  StreamSubscription<List<Factor>>? _factorsSubscription;
 
   FactorsBloc() : super(FactorsInitial()) {
     on<LoadFactors>(_onLoadFactors);
@@ -78,8 +79,8 @@ class FactorsBloc extends Bloc<FactorsEvent, FactorsState> {
 
   void _onLoadFactors(LoadFactors event, Emitter<FactorsState> emit) {
     emit(FactorsLoading());
-    _factorsStream ??= _factorRepository.watchAllFactors();
-    _factorsStream!.listen((factors) {
+    _factorsSubscription?.cancel();
+    _factorsSubscription = _factorRepository.watchAllFactors().listen((factors) {
       add(UpdateFactorsList(factors));
     });
   }
@@ -107,6 +108,12 @@ class FactorsBloc extends Bloc<FactorsEvent, FactorsState> {
     Emitter<FactorsState> emit,
   ) async {
     await _factorRepository.deleteFactor(event.id);
+  }
+
+  @override
+  Future<void> close() {
+    _factorsSubscription?.cancel();
+    return super.close();
   }
 }
 

@@ -17,14 +17,13 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
 
-      // Menambahkan data awal (default factors) saat database pertama kali dibuat
       await batch((batch) {
         batch.insertAll(factors, [
           FactorsCompanion.insert(name: 'Minum Kopi', icon: '☕'),
@@ -34,6 +33,11 @@ class AppDatabase extends _$AppDatabase {
           FactorsCompanion.insert(name: 'Layar HP', icon: '📱'),
         ]);
       });
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 2) {
+        await m.addColumn(users, users.profilePicture);
+      }
     },
   );
 }
