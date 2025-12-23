@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -57,16 +56,11 @@ class ProfileView extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 50,
                           backgroundColor: Colors.white,
-                          backgroundImage: profile.profilePicture != null
-                              ? FileImage(File(profile.profilePicture!))
-                              : null,
-                          child: profile.profilePicture == null
-                              ? Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: Colors.grey[400],
-                                )
-                              : null,
+                          child: Icon(
+                            Icons.person,
+                            size: 50,
+                            color: Colors.grey[400],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),

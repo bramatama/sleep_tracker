@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'dart:async';
 import '../../utils/service_locator.dart';
 import '../database/database.dart';
 
@@ -27,6 +28,11 @@ class FactorAnalysisResult {
 
 class SleepRepository {
   final AppDatabase _db = sl<AppDatabase>();
+  // Stream controller untuk memberi tahu kapan sesi selesai dan analisis perlu dijalankan ulang.
+  final _sessionCompletedController = StreamController<void>.broadcast();
+
+  // Stream yang bisa didengarkan oleh bagian lain dari aplikasi (misal: AnalysisBloc)
+  Stream<void> get onSessionCompleted => _sessionCompletedController.stream;
 
   // Memulai sesi tidur baru
   Future<int> startNewSession() {
@@ -78,6 +84,9 @@ class SleepRepository {
               ),
             );
       }
+
+      // Memberi tahu listener bahwa sesi telah selesai
+      _sessionCompletedController.add(null);
     });
   }
 

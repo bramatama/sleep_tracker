@@ -6,7 +6,13 @@ class WeeklyChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final days = ["S", "S", "R", "K", "J", "S", "M"];
+    final now = DateTime.now();
+
+    String getDayLabel(int weekday) {
+      const labels = ['S', 'S', 'R', 'K', 'J', 'S', 'M']; // Senin - Minggu
+      return labels[weekday - 1];
+    }
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -17,6 +23,9 @@ class WeeklyChart extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: List.generate(7, (index) {
               final value = data.length > index ? data[index] : 0.0;
+              // Hitung tanggal untuk kolom ini (index 0 = 6 hari lalu, index 6 = hari ini)
+              final date = now.subtract(Duration(days: 6 - index));
+
               return Flexible(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -36,7 +45,7 @@ class WeeklyChart extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(days[index]),
+                    Text(getDayLabel(date.weekday)),
                   ],
                 ),
               );

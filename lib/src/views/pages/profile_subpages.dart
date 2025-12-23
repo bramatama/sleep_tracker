@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../controllers/profile/profile_cubit.dart';
 import '../../models/repositories/sleep_repository.dart';
 import '../../utils/service_locator.dart';
@@ -17,7 +15,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   String? _selectedActivity;
-  String? _profilePicturePath;
 
   final List<String> _activities = [
     'Mahasiswa',
@@ -39,7 +36,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _nameController.text = profileState.profile.name;
       _emailController.text = profileState.profile.email;
       _selectedActivity = profileState.profile.primaryActivity;
-      _profilePicturePath = profileState.profile.profilePicture;
     }
   }
 
@@ -62,25 +58,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       name: _nameController.text,
       email: _emailController.text,
       primaryActivity: _selectedActivity,
-      profilePicture: _profilePicturePath,
     );
 
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Profil berhasil diperbarui!")),
     );
-  }
-
-  // Fungsi dummy untuk simulasi pick image.
-  // Di aplikasi nyata, gunakan package 'image_picker'.
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profilePicturePath = pickedFile.path;
-      });
-    }
   }
 
   @override
@@ -90,21 +73,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          Center(
-            child: GestureDetector(
-              onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: _profilePicturePath != null
-                    ? FileImage(File(_profilePicturePath!))
-                    : null,
-                child: _profilePicturePath == null
-                    ? const Icon(Icons.camera_alt, size: 40)
-                    : null,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
           TextFormField(
             controller: _nameController,
             decoration: const InputDecoration(
