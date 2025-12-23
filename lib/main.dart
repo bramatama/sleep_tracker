@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import './src/utils/app_router.dart';
-import './src/utils/service_locator.dart'; // Impor file baru
+import './src/utils/service_locator.dart';
+import './src/models/repositories/user_repository.dart';
 
-void main() {
-  // Panggil setupLocator sebelum menjalankan aplikasi
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
+
+  // Initialize default user
+  final userRepo = UserRepository();
+  await userRepo.getOrCreateDefaultUser();
 
   runApp(const MyApp());
 }

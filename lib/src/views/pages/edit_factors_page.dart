@@ -1,3 +1,4 @@
+// import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../controllers/factors/factors_bloc.dart';
@@ -10,17 +11,13 @@ class EditFactorsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: BlocProvider.of<FactorsBloc>(context),
-      child: const EditFactorsView(),
-    );
+    return const EditFactorsView();
   }
 }
 
 class EditFactorsView extends StatelessWidget {
   const EditFactorsView({super.key});
 
-  // -- FIX: Mengisi body fungsi yang kosong --
   void _showAddFactorDialog(BuildContext context) async {
     final newFactorData = await showDialog<Map<String, String>>(
       context: context,
@@ -30,7 +27,7 @@ class EditFactorsView extends StatelessWidget {
     );
 
     if (newFactorData != null && newFactorData.isNotEmpty) {
-      if (!context.mounted) return; // FIX: Menambahkan mounted check
+      if (!context.mounted) return;
       context.read<FactorsBloc>().add(
         AddFactor(newFactorData['name']!, newFactorData['icon']!),
       );
@@ -44,7 +41,7 @@ class EditFactorsView extends StatelessWidget {
     );
 
     if (updatedFactor != null) {
-      if (!context.mounted) return; // FIX: Menambahkan mounted check
+      if (!context.mounted) return;
       context.read<FactorsBloc>().add(EditFactor(updatedFactor));
     }
   }

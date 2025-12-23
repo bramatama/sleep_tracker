@@ -71,6 +71,9 @@ class FactorsBloc extends Bloc<FactorsEvent, FactorsState> {
     on<EditFactor>(_onEditFactor);
     on<DeleteFactor>(_onDeleteFactor);
     on<UpdateFactorsList>(_onUpdateFactorsList);
+    
+    // Automatically load factors on initialization
+    add(LoadFactors());
   }
 
   void _onLoadFactors(LoadFactors event, Emitter<FactorsState> emit) {

@@ -32,6 +32,9 @@ class HomeView extends StatelessWidget {
       ),
       body: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
           if (state.lastSession == null) {
             return const Center(
               child: Text("Belum ada data tidur. Mulai sesi pertamamu!"),

@@ -99,11 +99,48 @@ class SleepRepository {
     });
   }
 
-  // Mendapatkan data tidur untuk 7 hari terakhir
+  // Mendapatkan data tidur untuk 7 hari terakhir dengan perhitungan dari database
   Stream<List<double>> watchWeeklySleepDurations() {
-    // Logika ini akan mengambil data dan mengagregasinya per hari
-    // Untuk sementara, kita kembalikan stream data statis
-    return Stream.value([6.5, 7.0, 8.0, 6.0, 7.5, 9.0, 7.2]);
+    return _db.select(_db.sleepSessions).watch().asyncMap((sessions) async {
+      final now = DateTime.now();
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
+
+      // Kelompokkan sesi tidur per hari
+      final Map<String, List<SleepSession>> sessionsByDay = {};
+
+      for (var session in sessions) {
+        if (session.endedAt != null &&
+            session.endedAt!.isAfter(sevenDaysAgo) &&
+            session.endedAt!.isBefore(now.add(const Duration(days: 1)))) {
+          final dayKey =
+              "${session.endedAt!.year}-${session.endedAt!.month.toString().padLeft(2, '0')}-${session.endedAt!.day.toString().padLeft(2, '0')}";
+          sessionsByDay.putIfAbsent(dayKey, () => []).add(session);
+        }
+      }
+
+      // Hitung rata-rata durasi per hari untuk 7 hari terakhir
+      final List<double> weeklyData = [];
+      for (int i = 6; i >= 0; i--) {
+        final date = now.subtract(Duration(days: i));
+        final dayKey =
+            "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+
+        if (sessionsByDay.containsKey(dayKey)) {
+          final daySessions = sessionsByDay[dayKey]!;
+          final avgDuration =
+              daySessions
+                  .where((s) => s.durationInMinutes != null)
+                  .map((s) => s.durationInMinutes! / 60.0)
+                  .fold(0.0, (a, b) => a + b) /
+              daySessions.length;
+          weeklyData.add(avgDuration);
+        } else {
+          weeklyData.add(0.0); // Tidak ada data untuk hari tersebut
+        }
+      }
+
+      return weeklyData;
+    });
   }
 
   // Metode baru untuk analisis faktor
@@ -130,5 +167,54 @@ class SleepRepository {
     }
 
     return results;
+  }
+
+  // Export sleep data to CSV format
+  Future<String> exportDataAsCSV() async {
+    final allSessions = await _db.select(_db.sleepSessions).get();
+
+    if (allSessions.isEmpty) {
+      return 'Tanggal Mulai,Tanggal Selesai,Durasi (Menit),Rating Kualitas\n';
+    }
+
+    // Build CSV header
+    StringBuffer csv = StringBuffer();
+    csv.writeln('Tanggal Mulai,Tanggal Selesai,Durasi (Menit),Rating Kualitas');
+
+    // Add data rows
+    for (var session in allSessions) {
+      final startDate = session.startedAt.toString();
+      final endDate = session.endedAt?.toString() ?? 'Belum selesai';
+      final duration = session.durationInMinutes ?? 0;
+      final rating = session.qualityRating ?? 0;
+
+      csv.writeln('$startDate,$endDate,$duration,$rating');
+    }
+
+    return csv.toString();
+  }
+
+  // Get all sleep data with factors for export
+  Future<List<Map<String, dynamic>>> getAllSleepDataWithFactors() async {
+    final allSessions = await _db.select(_db.sleepSessions).get();
+    List<Map<String, dynamic>> result = [];
+
+    for (var session in allSessions) {
+      final factorsQuery = _db.select(_db.sleepSessionFactors).join([
+        innerJoin(
+          _db.factors,
+          _db.factors.id.equalsExp(_db.sleepSessionFactors.factorId),
+        ),
+      ])..where(_db.sleepSessionFactors.sleepSessionId.equals(session.id));
+
+      final factorRows = await factorsQuery.get();
+      final factors = factorRows
+          .map((row) => row.readTable(_db.factors))
+          .toList();
+
+      result.add({'session': session, 'factors': factors});
+    }
+
+    return result;
   }
 }

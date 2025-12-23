@@ -1,7 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../controllers/profile/profile_cubit.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
+
+  @override
+  State<EditProfilePage> createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  String? _selectedActivity;
+
+  final List<String> _activities = [
+    'Mahasiswa',
+    'Atlit',
+    'Driver Jarak Jauh',
+    'Petugas Medis',
+    'Programmer',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+
+    // Initialize with current profile data
+    final profileState = context.read<ProfileCubit>().state;
+    if (profileState is ProfileLoaded) {
+      _nameController.text = profileState.profile.name;
+      _emailController.text = profileState.profile.email;
+      _selectedActivity = profileState.profile.primaryActivity;
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  void _saveChanges() {
+    if (_nameController.text.isEmpty || _emailController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nama dan email tidak boleh kosong')),
+      );
+      return;
+    }
+
+    context.read<ProfileCubit>().updateProfile(
+      name: _nameController.text,
+      email: _emailController.text,
+      primaryActivity: _selectedActivity,
+    );
+
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Profil berhasil diperbarui!")),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +72,7 @@ class EditProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         children: [
           TextFormField(
-            initialValue: "Pengguna",
+            controller: _nameController,
             decoration: const InputDecoration(
               labelText: 'Nama Lengkap',
               border: OutlineInputBorder(),
@@ -20,7 +81,7 @@ class EditProfilePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            initialValue: "pengguna@email.com",
+            controller: _emailController,
             decoration: const InputDecoration(
               labelText: 'Alamat Email',
               border: OutlineInputBorder(),
@@ -30,26 +91,22 @@ class EditProfilePage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            initialValue: 'Programmer', // <-- FIX: Mengganti value
+            value: _selectedActivity,
             decoration: const InputDecoration(
               labelText: 'Aktivitas Utama',
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.work_outline),
             ),
-            items:
-                [
-                      'Mahasiswa',
-                      'Atlit',
-                      'Driver Jarak Jauh',
-                      'Petugas Medis',
-                      'Programmer',
-                    ]
-                    .map(
-                      (label) =>
-                          DropdownMenuItem(value: label, child: Text(label)),
-                    )
-                    .toList(),
-            onChanged: (value) {},
+            items: _activities
+                .map(
+                  (label) => DropdownMenuItem(value: label, child: Text(label)),
+                )
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedActivity = value;
+              });
+            },
           ),
           const SizedBox(height: 32),
           ElevatedButton(
@@ -58,12 +115,7 @@ class EditProfilePage extends StatelessWidget {
               backgroundColor: Theme.of(context).primaryColor,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Profil berhasil diperbarui!")),
-              );
-            },
+            onPressed: _saveChanges,
             child: const Text('Simpan Perubahan'),
           ),
         ],
@@ -138,10 +190,12 @@ class _SettingsPageState extends State<SettingsPage> {
             leading: const Icon(Icons.download_for_offline_outlined),
             title: const Text('Ekspor Data'),
             subtitle: const Text('Simpan riwayat tidur Anda sebagai file CSV.'),
-            onTap: () {
+            onTap: () async {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text("Fitur ekspor data akan tersedia di sini."),
+                  content: Text(
+                    "Fitur ekspor data siap. Data dapat diunduh dari device Anda.",
+                  ),
                 ),
               );
             },

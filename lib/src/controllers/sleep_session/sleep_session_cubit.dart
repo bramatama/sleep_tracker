@@ -76,9 +76,11 @@ class SleepSessionCubit extends Cubit<SleepSessionState> {
 
   Future<void> endSession(int quality) async {
     if (state.activeSessionId != null) {
+      // Ensure quality is between 1 and 5
+      final validatedQuality = quality.clamp(1, 5);
       await _sleepRepo.endSession(
         sessionId: state.activeSessionId!,
-        quality: quality,
+        quality: validatedQuality,
         selectedFactors: state.selectedFactors.toList(),
       );
       emit(state.copyWith(status: SleepStatus.finished));

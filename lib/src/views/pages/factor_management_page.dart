@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../controllers/factors/factors_bloc.dart';
-// import '../../models/database/database.dart';
 
 class FactorManagementPage extends StatelessWidget {
   const FactorManagementPage({super.key});
@@ -10,7 +9,7 @@ class FactorManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => FactorsBloc()..add(LoadFactors()),
+      create: (context) => FactorsBloc(),
       child: const FactorManagementView(),
     );
   }
@@ -28,7 +27,9 @@ class FactorManagementView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: "Edit Faktor",
-            onPressed: () => context.push('/factors/edit'),
+            onPressed: () {
+              context.push('/factors/edit', extra: context.read<FactorsBloc>());
+            },
           ),
         ],
       ),

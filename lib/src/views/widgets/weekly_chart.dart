@@ -10,28 +10,38 @@ class WeeklyChart extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(7, (index) {
-            final value = data.length > index ? data[index] : 0.0;
-            return Column(
-              children: [
-                Text(value.toStringAsFixed(1)),
-                const SizedBox(height: 4),
-                Container(
-                  height: value * 10, // simple scaling
-                  width: 20,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorLight,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 150),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(7, (index) {
+              final value = data.length > index ? data[index] : 0.0;
+              return Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      value.toStringAsFixed(1),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      height: value * 10 > 20 ? value * 10 : 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColorLight,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(days[index]),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(days[index]),
-              ],
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
     );

@@ -73,6 +73,18 @@ class AnalysisView extends StatelessWidget {
               ],
             );
           }
+          if (state is AnalysisError) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  SizedBox(height: 16),
+                  Text('Gagal memuat data analisis'),
+                ],
+              ),
+            );
+          }
           return const Center(child: Text("Gagal memuat data analisis."));
         },
       ),
